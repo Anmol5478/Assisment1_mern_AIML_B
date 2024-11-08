@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgb(255, 203, 72);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: #f3b25d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        select {
+            width: calc(50% - 10px);
+            padding: 10px;
+            margin: 10px 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        footer {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #333;
+        }
+        </style>
+</head>
+
+<body>
+    <div style="display: flex; flex-direction: column;">
+    <div class="container">
+        <h1>Currency Converter</h1>
+        <select id="from">
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="INR">INR</option>
+            <option value="AUD">AUD</option>
+            <option value="CAD">CAD</option>
+            <option value="JPY">JPY</option>
+
+        </select>
+        <input type="text" id="amt" placeholder="Amount" required>
+        <br>
+        <select id="to">
+            <option value="EUR">EUR</option>
+            <option value="USD">USD</option>
+            <option value="GBP">GBP</option>
+            <option value="INR">INR</option>
+            <option value="AUD">AUD</option>
+            <option value="CAD">CAD</option>
+            <option value="JPY">JPY</option>
+
+        </select>
+        <input type="text" id="conamt" placeholder="Converted Amount" readonly>
+        <br>
+        <button id="convertBtn">Convert</button>
+        <div class="loading" id="loading">Loading...</div>
+        <div class="error-message" id="error-message"></div>
+    </div>
+    <footer>
+        <h2>Design and Develop by &copy; Anmol Gupta</h2>
+    </footer>
+
+</div>
+    <script>
+        const btn = document.getElementById('convertBtn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+
+        btn.addEventListener('click', function () {
+            const fromCurr = document.getElementById ('from').value;
+            const toCurr = document.getElementById('to').value;
+            const amt = parseFloat(document.getElementById('amt').value);
+            const conamt = document.getElementById('conamt');
+
+            // Clear previous error message
+            errorMessage.textContent = '';
+
+            // Validate input
+            if (isNaN(amt) || amt <= 0) {
+                errorMessage.textContent = 'Please enter a valid amount.';
+                return;
+            }
+
+            loading.style.display = 'block';
+            const url = `https://api.exchangerate-api.com/v4/latest/${fromCurr}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const rate = data.rates[toCurr.toUpperCase()];
+                    if (!rate) {
+                        throw new Error('Invalid currency code');
+                    }
+                    const convertedAmt = amt * rate;
+                    conamt.value = convertedAmt.toFixed(2);
+                })
+                .catch(error => {
+                    errorMessage.textContent = 'Error: ' + error.message;
+                })
+                .finally(() => {
+                    loading.style.display = 'none';
+                });
+        });
+    </script>
+</body>
+
+</html>
